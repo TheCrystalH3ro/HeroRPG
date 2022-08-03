@@ -8,8 +8,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -22,6 +24,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 import me.h3ro.herorpg.App;
+import me.h3ro.herorpg.utils.LevelRequirement;
 import me.h3ro.herorpg.utils.Utils;
 
 public class LevelManager {
@@ -31,22 +34,19 @@ public class LevelManager {
     public static HashMap<UUID, Integer> experience = new HashMap<UUID, Integer>();
     public static HashMap<UUID, Integer> level = new HashMap<UUID, Integer>();
 
+    private int maxLvl;
+
+    private PriorityQueue<LevelRequirement> lvlUpReq;
+
+    private ArrayList<Integer> toLvlUp;
+
     public LevelManager(App plugin){
         this.plugin = plugin;
-        setupLevelExperience();
+
+        this.lvlUpReq = new PriorityQueue<>();
+
+        this.setupLevelExperience();
     }
-
-    public int maxLvl;
-
-    public List<List<Integer>> lvlUpReq = new ArrayList<List<Integer>>();
-
-    public int nextLvl;
-    public int nextLvlXP;
-
-    public int prevLvl;
-    public int prevLvlXP;
-
-    public int[] toLvlUp;
 
     public void saveExperienceFile() throws FileNotFoundException, IOException {
 
@@ -148,93 +148,98 @@ public class LevelManager {
 
     }
 
-    public void setupLevelExperience(){
-        int lvlXP;
-        int lvlRange;
-        int index = 0;
+    private void setupLevelExperience(){
         
-        this.maxLvl = plugin.config.getInt("Levels.maxLevel");
+        this.maxLvl = plugin.getMaxLvl();
 
-        this.toLvlUp = new int[maxLvl+1];
+        this.toLvlUp = new ArrayList<>();
 
-        ConfigurationSection lvlKeys = plugin.config.getConfigurationSection("Levels.levelUpXp");
+        ConfigurationSection lvlKeys = plugin.getLvlKeys();
 
         for(String lvlKey : lvlKeys.getKeys(true)){
             if(lvlKey.equals("level")) {
                 continue;
             }
-            lvlUpReq.add( lvlKeys.getIntegerList(lvlKey) ); 
+            lvlUpReq.add( new LevelRequirement(lvlKeys.getIntegerList(lvlKey)) ); 
         }
 
-        for(int i=0; i <= maxLvl; i++){
+        boolean levelsDefined = lvlUpReq.size() != 0;
+        boolean levelsValid = lvlUpReq.peek().isValid();
+
+        if(!levelsDefined || !levelsValid) {
+            this.toLvlUp =  new ArrayList<Integer>(Collections.nCopies(this.maxLvl, 100));
+            this.toLvlUp.add(0, 0);
+            this.toLvlUp.set(1, 0);
+            return;
+        }
+
+        LevelRequirement previous = null;
+        LevelRequirement levelMark = lvlUpReq.poll();
+
+        int xpStep = 0;
+        int lvlRange = 0;
+
+        int lvlXP;
+        int prevLvlXP = 0;
+
+        for(int i=0; i <= maxLvl; i++) {
             
-            if(i == 0 || i == 1){
-                toLvlUp[i] = 0;
+            //Skip level 0 and 1
+            if(i == 0 || i == 1) {
+                this.toLvlUp.add(i, 0);
                 continue;
             }
 
-            //Default values
-            if(lvlUpReq.size() == 0 || lvlUpReq.get(0).size() == 0){
+            if(previous == null) {
 
-                prevLvl = 2;
-                nextLvl = maxLvl;
-    
-                prevLvlXP = 100;
-                nextLvlXP = 100;
+                lvlXP = levelMark.getXP();
+                xpStep = lvlXP;
+                prevLvlXP = lvlXP;
 
-            } else if( lvlUpReq.size() == 1 ){
-
-                prevLvl = lvlUpReq.get(0).get(0);
-                nextLvl = maxLvl;
-
-                prevLvlXP = lvlUpReq.get(0).get(1);
-                nextLvlXP = lvlUpReq.get(0).get(1);
-
-
-            } else {
-
-                if(i < lvlUpReq.get(index).get(0)){
-                    prevLvl = 2;
-                    nextLvl = maxLvl;
-
-                    prevLvlXP = lvlUpReq.get(index).get(1);
-                    nextLvlXP = lvlUpReq.get(index).get(1);
-                }
-
-                if(i > lvlUpReq.get(index+1).get(0)){
-
-                    if(lvlUpReq.size() > index+2){
-
-                        index++;
-
-                    } else {
-
-                        prevLvl = lvlUpReq.get(index+1).get(0);
-                        nextLvl = maxLvl;
-
-                        prevLvlXP = lvlUpReq.get(index+1).get(1);
-                        nextLvlXP = lvlUpReq.get(index+1).get(1);
-
-                    }
-
-                }
-
-                if(i >= lvlUpReq.get(index).get(0) && i <= lvlUpReq.get(index+1).get(0)){
-                    prevLvl = lvlUpReq.get(index).get(0);
-                    nextLvl = lvlUpReq.get(index+1).get(0);
-                        
-                    prevLvlXP = lvlUpReq.get(index).get(1);
-                    nextLvlXP = lvlUpReq.get(index+1).get(1);
+                for(; i < levelMark.getLevel(); i++) {
+                    toLvlUp.add(lvlXP);
                 }
 
             }
 
-            lvlRange = (nextLvl == prevLvl) ? 1 : nextLvl - prevLvl;
+            //Next level requirement is not defined
+            if(levelMark == null) {
 
-            //Previous XP to Level UP + (current level - prevLevel) * (NextLVL - PrevLVL) / number of levels in between
-            lvlXP = prevLvlXP + ((nextLvlXP - prevLvlXP) * (i-prevLvl) / lvlRange);
+                for(; i <= maxLvl; i++) {
+                    lvlXP = prevLvlXP + xpStep;
+                    toLvlUp.add(lvlXP);
+                    prevLvlXP = lvlXP;
+                }
 
-            toLvlUp[i] = lvlXP;
+                continue;
+
+            }
+
+            if(levelMark.getLevel() == i) {
+
+                lvlXP = levelMark.getXP();
+                prevLvlXP = lvlXP;
+
+                toLvlUp.add(i, lvlXP);
+
+                previous = levelMark;
+                levelMark = lvlUpReq.poll();
+
+                if(levelMark != null) {
+
+                    lvlRange = levelMark.getLevel() - previous.getLevel();
+                    xpStep = (levelMark.getXP() - previous.getXP()) / lvlRange;
+
+                }
+
+                continue;
+
+            }
+
+            lvlXP = prevLvlXP + xpStep;
+            prevLvlXP = lvlXP;
+
+            toLvlUp.add(lvlXP);
 
         }
     }
@@ -253,7 +258,7 @@ public class LevelManager {
 
         }
 
-        experienceReceived(player);
+        this.experienceReceived(player);
 
     }
 
@@ -282,7 +287,7 @@ public class LevelManager {
         
         experience.put(p_uuid, amount);
 
-        experienceReceived(player);
+        this.experienceReceived(player);
     }
 
     public int getPlayerExperience(OfflinePlayer player){
@@ -300,12 +305,6 @@ public class LevelManager {
         UUID p_uuid = player.getUniqueId();
 
         int lvlToAdd;
-
-        setPlayerExperience(player, 0);
-
-        if(amount > maxLvl){
-            amount = maxLvl;
-        }
 
         if( level.get(p_uuid) != null){
 
@@ -363,8 +362,6 @@ public class LevelManager {
 
     public void removeLevelFromPlayer(OfflinePlayer player, int amount){
         UUID p_uuid = player.getUniqueId();
-
-        setPlayerExperience(player, 0);
                 
         if(level.get(p_uuid) != null){
             
@@ -418,9 +415,9 @@ public class LevelManager {
             return;
         }
 
-        while(playerXP >= toLvlUp[ playerLvl + 1 ]){
+        while(playerXP >= toLvlUp.get(playerLvl + 1)){
 
-            playerXP -= toLvlUp[ playerLvl + 1 ];
+            playerXP -= toLvlUp.get(playerLvl + 1);
 
             playerLvl++;
 
@@ -449,6 +446,18 @@ public class LevelManager {
             player.sendMessage(Utils.chat("&8[&6HeroRPG&8] &aYou have leveled up to level &6" + level + "&7!"));
         }
 
+
+    }
+
+    public int getLevelRequirement(OfflinePlayer player) {
+
+        int level = this.getPlayerLevel(player) + 1;
+
+        if(this.toLvlUp.size() <= level) {
+            return this.getPlayerExperience(player);
+        }
+
+        return this.toLvlUp.get(level);
 
     }
 

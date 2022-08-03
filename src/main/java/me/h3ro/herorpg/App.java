@@ -2,6 +2,7 @@ package me.h3ro.herorpg;
 
 import java.io.IOException;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -13,7 +14,9 @@ import me.h3ro.herorpg.managers.LevelManager;
 
 public class App extends JavaPlugin {
     
-    public FileConfiguration config = getConfig();
+    private FileConfiguration config;
+    
+    private LevelManager levelManager;
 
     public void updateConfig(){
         this.reloadConfig();
@@ -22,47 +25,56 @@ public class App extends JavaPlugin {
 
     @Override
     public void onEnable(){
-        config = AppConfig.setupConfig(config);
-        saveConfig();
 
-        LevelManager levelManager = new LevelManager(this);
-        try{
-            levelManager.loadExperienceFile();
-            levelManager.loadLevelFile();
-        } catch(ClassNotFoundException | IOException e){
-            e.printStackTrace();
-        }
+        this.config = AppConfig.setupConfig(this.getConfig());
+        this.saveConfig();
         
-        registerManagers();
-        registerCommands();
-        registerListeners();
+        this.registerManagers();
+        this.registerCommands();
+        this.registerListeners();
         
     }
 
     @Override
     public void onDisable(){
 
-        LevelManager levelManager = new LevelManager(this);
         try{
-            levelManager.saveExperienceFile();
-            levelManager.saveLevelFile();
+            this.levelManager.saveExperienceFile();
+            this.levelManager.saveLevelFile();
         } catch(IOException e){
             e.printStackTrace();
         }
 
     }
 
-    public void registerManagers(){
-        LevelManager levelManager = new LevelManager(this);
+    private void registerManagers(){
+
+        this.levelManager = new LevelManager(this);
+
+        try{
+            this.levelManager.loadExperienceFile();
+            this.levelManager.loadLevelFile();
+        } catch(ClassNotFoundException | IOException e){
+            e.printStackTrace();
+        }
+
     }
 
-    public void registerCommands(){
-        new HeroCommands(this);
+    private void registerCommands(){
+        new HeroCommands(this, this.levelManager);
     }
 
-    public void registerListeners(){
+    private void registerListeners(){
         new PlayerJoinListener(this);
         new ExperienceListener(this);
+    }
+
+    public int getMaxLvl() {
+        return this.config.getInt("Levels.maxLevel");
+    }
+
+    public ConfigurationSection getLvlKeys() {
+        return this.config.getConfigurationSection("Levels.levelUpXp");
     }
 
 }

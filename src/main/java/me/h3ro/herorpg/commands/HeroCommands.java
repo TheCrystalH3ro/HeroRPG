@@ -14,11 +14,23 @@ import me.h3ro.herorpg.utils.Utils;
 public class HeroCommands implements CommandExecutor {
 
     private App plugin;
+
+    private LevelManager levelManager;
     
-    public HeroCommands(App plugin){
+    public HeroCommands(App plugin, LevelManager levelManager){
         this.plugin = plugin;
 
+        this.levelManager = levelManager;
+
         plugin.getCommand("herorpg").setExecutor(this);
+    }
+
+    private void showPlayerExperience(CommandSender sender, OfflinePlayer player) {
+
+        int nextLvlXP = this.levelManager.getLevelRequirement(player);
+    
+        sender.sendMessage(Utils.chat("&8[&6HeroRPG&8] &3"+ player.getName() +" &7's experience: &6" + this.levelManager.getPlayerExperience(player) + "&7/&6" + nextLvlXP ));
+
     }
 
     @Override
@@ -66,17 +78,7 @@ public class HeroCommands implements CommandExecutor {
                         Player player = (Player) sender;
                         LevelManager manager = new LevelManager(plugin);
 
-                        int playerLvl = manager.getPlayerLevel(player);
-                        
-                        int[] toLvlUp = manager.toLvlUp;
-
-                        int nextLvlXP;
-
-                        if(toLvlUp.length > playerLvl + 1){
-                            nextLvlXP = toLvlUp[playerLvl + 1];
-                        } else {
-                            nextLvlXP = manager.getPlayerExperience(player);
-                        }
+                        int nextLvlXP = manager.getLevelRequirement(player);
 
                         sender.sendMessage(Utils.chat("&8[&6HeroRPG&8] &7Your experience: &6" + manager.getPlayerExperience(player) + "&7/&6" + nextLvlXP ));
 
@@ -170,24 +172,11 @@ public class HeroCommands implements CommandExecutor {
 
                         @SuppressWarnings("deprecation")
                         OfflinePlayer player = Bukkit.getOfflinePlayer(args[1]);
-                        LevelManager manager = new LevelManager(plugin);
 
 
                         if(player.hasPlayedBefore()){
-                            
-                            int playerLvl = manager.getPlayerLevel(player);
 
-                            int[] toLvlUp = manager.toLvlUp;
-
-                            int nextLvlXP;
-
-                            if(toLvlUp.length > playerLvl + 1){
-                                nextLvlXP = toLvlUp[playerLvl + 1];
-                            } else {
-                                nextLvlXP = manager.getPlayerExperience(player);
-                            }
-
-                            sender.sendMessage(Utils.chat("&8[&6HeroRPG&8] &3"+ player.getName() +" &7's experience: &6" + manager.getPlayerExperience(player) + "&7/&6" + nextLvlXP ));
+                            this.showPlayerExperience(sender, player);
 
                             return true;
 
@@ -285,24 +274,10 @@ public class HeroCommands implements CommandExecutor {
                     if(args[1].equalsIgnoreCase("get")){
 
                         if(sender.hasPermission("herorpg.view")){
-
-                            LevelManager manager = new LevelManager(plugin);
     
                             if(player.hasPlayedBefore()){
-                                
-                                int playerLvl = manager.getPlayerLevel(player);
 
-                                int nextLvlXP;
-
-                                int[] toLvlUp = manager.toLvlUp;
-
-                                if(toLvlUp.length > playerLvl + 1){
-                                    nextLvlXP = toLvlUp[playerLvl + 1];
-                                } else {
-                                    nextLvlXP = manager.getPlayerExperience(player);
-                                }
-    
-                                sender.sendMessage(Utils.chat("&8[&6HeroRPG&8] &3"+ player.getName() +" &7's experience: &6" + manager.getPlayerExperience(player) + "&7/&6" + nextLvlXP ));
+                                this.showPlayerExperience(sender, player);
 
                                 return true;
     
