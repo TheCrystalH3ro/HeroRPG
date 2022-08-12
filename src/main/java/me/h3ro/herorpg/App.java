@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.h3ro.herorpg.commands.HeroCommands;
@@ -76,6 +77,21 @@ public class App extends JavaPlugin {
 
     public ConfigurationSection getLvlKeys() {
         return this.config.getConfigurationSection("Levels.levelUpXp");
+    }
+
+    public int getBaseXP() {
+        return this.config.getInt("Levels.dropRate.base");
+    }
+
+    public Integer getMobDropXP(EntityType type) {
+
+        String path = "Levels.dropRate.mobTypes." + type.toString();
+
+        if(!this.config.isInt(path)) {
+            return null;
+        }
+
+        return this.config.getInt(path);
     }
 
     public void initPlayerJoin(OfflinePlayer player) {

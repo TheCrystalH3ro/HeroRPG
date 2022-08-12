@@ -46,7 +46,9 @@ public class ExperienceListener implements Listener {
 
         LevelManager manager = this.plugin.getLevelManager();
 
-        manager.addExperienceToPlayer(Bukkit.getOfflinePlayer(p_uuid), 10);
+        int dropXP = manager.getMobDropXP(mob.getType());
+
+        manager.addExperienceToPlayer(Bukkit.getOfflinePlayer(p_uuid), dropXP);
 
     }
     
