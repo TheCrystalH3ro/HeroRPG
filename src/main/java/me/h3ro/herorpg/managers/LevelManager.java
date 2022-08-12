@@ -266,6 +266,7 @@ public class LevelManager {
         }
 
         this.experienceReceived(player);
+        this.experienceChanged(player);
 
     }
 
@@ -282,6 +283,8 @@ public class LevelManager {
             
             experience.put(p_uuid, expToSet);
 
+            this.experienceChanged(player);
+
         }
     }
 
@@ -295,6 +298,7 @@ public class LevelManager {
         experience.put(p_uuid, amount);
 
         this.experienceReceived(player);
+        this.experienceChanged(player);
     }
 
     public int getPlayerExperience(OfflinePlayer player){
@@ -313,7 +317,7 @@ public class LevelManager {
 
         int lvlToAdd;
 
-        if( level.get(p_uuid) != null){
+        if( level.get(p_uuid) != null) {
 
             lvlToAdd = level.get(p_uuid) + amount;
 
@@ -327,13 +331,15 @@ public class LevelManager {
 
             lvlToAdd = amount;
 
-            if(lvlToAdd > maxLvl){
+            if(lvlToAdd > maxLvl) {
                 lvlToAdd = maxLvl;
             }
 
             level.put(p_uuid, amount);
 
         }
+
+        this.levelChanged(player);
 
     }
 
@@ -343,7 +349,7 @@ public class LevelManager {
 
         int lvlToAdd;
 
-        if( level.get(p_uuid) != null){
+        if( level.get(p_uuid) != null) {
 
             lvlToAdd = level.get(p_uuid) + 1;
 
@@ -357,13 +363,15 @@ public class LevelManager {
 
             lvlToAdd = 2;
 
-            if(lvlToAdd > maxLvl){
+            if(lvlToAdd > maxLvl) {
                 lvlToAdd = maxLvl;
             }
 
             level.put(p_uuid, lvlToAdd);
 
         }
+
+        this.levelChanged(player);
 
     }
 
@@ -379,6 +387,8 @@ public class LevelManager {
             }
             
             level.put(p_uuid, lvlToSet);
+
+            this.levelChanged(player);
 
         }
     }
@@ -398,6 +408,8 @@ public class LevelManager {
         
         level.put(p_uuid, amount);
 
+        this.levelChanged(player);
+
     }
 
     public int getPlayerLevel(OfflinePlayer player){
@@ -416,19 +428,21 @@ public class LevelManager {
 
         int playerXP = experience.get(p_uuid);
 
-        int playerLvl = getPlayerLevel(player);
+        int playerLvl = this.getPlayerLevel(player);
 
-        if(playerLvl >= maxLvl){
+        boolean leveledUp = false;
+
+        if(playerLvl >= maxLvl) {
             return;
         }
 
-        while(playerXP >= toLvlUp.get(playerLvl + 1)){
+        while(playerXP >= toLvlUp.get(playerLvl + 1)) {
 
             playerXP -= toLvlUp.get(playerLvl + 1);
 
             playerLvl++;
 
-            onLevelUp(player, playerLvl);
+            leveledUp = true;
 
             if(playerLvl >= maxLvl){
                 break;
@@ -436,13 +450,59 @@ public class LevelManager {
 
         }
 
-        if(playerLvl >= maxLvl){
-            setPlayerLevel(player, maxLvl);
+        if(playerLvl >= maxLvl) {
+            this.setPlayerLevel(player, maxLvl);
             return;
         }
 
         experience.put(p_uuid, playerXP);
         level.put(p_uuid, playerLvl);
+
+        if(leveledUp) {
+            this.onLevelUp(player, playerLvl);
+        }
+
+    }
+
+    public void updateExperienceDisplay(OfflinePlayer player) {
+
+        Player p = player.getPlayer();
+
+        int xp = this.getPlayerExperience(player);
+
+        if(p != null && !this.plugin.isXPBarEnabled()) {
+            
+            int maxXP = this.getLevelRequirement(player);
+
+            float percentage = xp / (float) maxXP;
+
+            p.setExp(percentage);
+
+        }
+
+    }
+
+    public void updateLevelDisplay(OfflinePlayer player) {
+
+        Player p = player.getPlayer();
+
+        int lvl = this.getPlayerLevel(player);
+
+        if(p != null && !this.plugin.isXPBarEnabled()) {
+            p.setLevel(lvl);
+        }
+
+    }
+
+    private void experienceChanged(OfflinePlayer player) {
+
+        this.updateExperienceDisplay(player);
+
+    }
+
+    private void levelChanged(OfflinePlayer player) {
+
+        this.updateLevelDisplay(player);
 
     }
 
@@ -453,6 +513,7 @@ public class LevelManager {
             player.sendMessage(Utils.chat("&8[&6HeroRPG&8] &aYou have leveled up to level &6" + level + "&7!"));
         }
 
+        this.levelChanged(p);
 
     }
 

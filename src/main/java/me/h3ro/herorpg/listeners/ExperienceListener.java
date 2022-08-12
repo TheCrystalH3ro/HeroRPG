@@ -26,8 +26,9 @@ public class ExperienceListener implements Listener {
     @EventHandler
     public void onExperienceReceived(PlayerExpChangeEvent event){
 
-        //If disabled XP bar - cancel getting XP
-        event.setAmount(0);
+        if(!this.plugin.isXPBarEnabled()) {
+            event.setAmount(0);
+        }
 
     }
 

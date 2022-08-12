@@ -2,10 +2,12 @@ package me.h3ro.herorpg;
 
 import java.io.IOException;
 
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.h3ro.herorpg.commands.HeroCommands;
@@ -20,13 +22,21 @@ public class App extends JavaPlugin {
     
     private LevelManager levelManager;
 
-    public void updateConfig(){
+    public void updateConfig() {
         this.reloadConfig();
         this.config = this.getConfig();
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+
+            OfflinePlayer p = Bukkit.getOfflinePlayer(player.getUniqueId());
+
+            this.updatePlayerUI(p);
+
+        }
     }
 
     @Override
-    public void onEnable(){
+    public void onEnable() {
 
         this.config = AppConfig.setupConfig(this.getConfig());
         this.saveConfig();
@@ -38,7 +48,7 @@ public class App extends JavaPlugin {
     }
 
     @Override
-    public void onDisable(){
+    public void onDisable() {
 
         try{
             this.levelManager.saveExperienceFile();
@@ -49,7 +59,7 @@ public class App extends JavaPlugin {
 
     }
 
-    private void registerManagers(){
+    private void registerManagers() {
 
         this.levelManager = new LevelManager(this);
 
@@ -62,11 +72,11 @@ public class App extends JavaPlugin {
 
     }
 
-    private void registerCommands(){
+    private void registerCommands() {
         new HeroCommands(this, this.levelManager);
     }
 
-    private void registerListeners(){
+    private void registerListeners() {
         new PlayerJoinListener(this);
         new ExperienceListener(this);
     }
@@ -94,6 +104,10 @@ public class App extends JavaPlugin {
         return this.config.getInt(path);
     }
 
+    public boolean isXPBarEnabled() {
+        return this.config.getBoolean("Levels.xpBar");
+    }
+
     public void initPlayerJoin(OfflinePlayer player) {
 
         int playerLvl = this.levelManager.getPlayerLevel(player);
@@ -102,6 +116,15 @@ public class App extends JavaPlugin {
             this.levelManager.setPlayerLevel(player, 1);
         }
 
+        this.updatePlayerUI(player);
+
+    }
+
+    private void updatePlayerUI(OfflinePlayer player) {
+
+        this.levelManager.updateExperienceDisplay(player);
+        this.levelManager.updateLevelDisplay(player);
+        
     }
 
     public LevelManager getLevelManager() {
