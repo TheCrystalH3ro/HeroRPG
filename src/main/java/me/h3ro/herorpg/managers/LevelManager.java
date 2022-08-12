@@ -10,15 +10,11 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -48,6 +44,7 @@ public class LevelManager {
         this.setupLevelExperience();
     }
 
+    
     public void saveExperienceFile() throws FileNotFoundException, IOException {
 
         String fileLocation = String.format("%s\\Data\\experience.dat", plugin.getDataFolder().getAbsolutePath());
@@ -94,6 +91,7 @@ public class LevelManager {
 
     }
 
+    @SuppressWarnings("unchecked")
     public void loadExperienceFile() throws FileNotFoundException, IOException, ClassNotFoundException {
 
         String fileLocation = String.format("%s\\Data\\experience.dat", plugin.getDataFolder().getAbsolutePath());
@@ -121,6 +119,7 @@ public class LevelManager {
 
     }
 
+    @SuppressWarnings("unchecked")
     public void loadLevelFile() throws FileNotFoundException, IOException, ClassNotFoundException {
 
         String fileLocation = String.format("%s\\Data\\level.dat", plugin.getDataFolder().getAbsolutePath());
@@ -175,6 +174,13 @@ public class LevelManager {
 
         LevelRequirement previous = null;
         LevelRequirement levelMark = lvlUpReq.poll();
+
+        if(lvlUpReq.peek() == null) {
+            this.toLvlUp =  new ArrayList<Integer>(Collections.nCopies(this.maxLvl, levelMark.getXP()));
+            this.toLvlUp.add(0, 0);
+            this.toLvlUp.set(1, 0);
+            return;
+        } 
 
         int xpStep = 0;
         int lvlRange = 0;

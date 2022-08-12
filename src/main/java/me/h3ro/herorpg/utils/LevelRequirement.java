@@ -2,8 +2,6 @@ package me.h3ro.herorpg.utils;
 
 import java.util.List;
 
-import org.bukkit.Bukkit;
-
 public class LevelRequirement  implements Comparable<LevelRequirement> {
     
     private int level;
