@@ -17,6 +17,7 @@ import java.util.zip.GZIPOutputStream;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import me.h3ro.herorpg.App;
@@ -464,6 +465,18 @@ public class LevelManager {
         }
 
         return this.toLvlUp.get(level);
+
+    }
+
+    public int getMobDropXP(EntityType type) {
+
+        Integer dropXP = this.plugin.getMobDropXP(type);
+
+        if(dropXP == null) {
+            dropXP = this.plugin.getBaseXP();
+        }
+
+        return dropXP;
 
     }
 
