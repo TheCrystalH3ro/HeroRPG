@@ -2,6 +2,7 @@ package me.h3ro.herorpg;
 
 import java.io.IOException;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -75,6 +76,20 @@ public class App extends JavaPlugin {
 
     public ConfigurationSection getLvlKeys() {
         return this.config.getConfigurationSection("Levels.levelUpXp");
+    }
+
+    public void initPlayerJoin(OfflinePlayer player) {
+
+        int playerLvl = this.levelManager.getPlayerLevel(player);
+
+        if(playerLvl <= 0){
+            this.levelManager.setPlayerLevel(player, 1);
+        }
+
+    }
+
+    public LevelManager getLevelManager() {
+        return this.levelManager;
     }
 
 }

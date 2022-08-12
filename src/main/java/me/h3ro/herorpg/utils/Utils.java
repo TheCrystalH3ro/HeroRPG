@@ -14,6 +14,7 @@ public class Utils {
         return ChatColor.translateAlternateColorCodes('&', message);
     }
 
+    @SuppressWarnings("deprecation")
     public static ItemStack createItem(String materialString, int amount, int data, int customModelData, String displayName, List<String> description){
         ItemStack item;
 

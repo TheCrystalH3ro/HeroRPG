@@ -38,9 +38,13 @@ public class ExperienceListener implements Listener {
 
         Player player = mob.getKiller();
 
+        if(player == null) {
+            return;
+        }
+
         UUID p_uuid = player.getUniqueId();
 
-        LevelManager manager = new LevelManager(plugin);
+        LevelManager manager = this.plugin.getLevelManager();
 
         manager.addExperienceToPlayer(Bukkit.getOfflinePlayer(p_uuid), 10);
 
