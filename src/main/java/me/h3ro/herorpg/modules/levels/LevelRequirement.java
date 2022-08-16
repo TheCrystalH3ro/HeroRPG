@@ -1,4 +1,4 @@
-package me.h3ro.herorpg.utils;
+package me.h3ro.herorpg.modules.levels;
 
 import java.util.List;
 

@@ -21,7 +21,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import me.h3ro.herorpg.App;
-import me.h3ro.herorpg.utils.LevelRequirement;
+import me.h3ro.herorpg.modules.levels.LevelRequirement;
 import me.h3ro.herorpg.utils.Utils;
 
 public class LevelManager {
