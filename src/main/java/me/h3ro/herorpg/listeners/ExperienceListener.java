@@ -11,7 +11,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 
 import me.h3ro.herorpg.App;
-import me.h3ro.herorpg.managers.LevelManager;
+import me.h3ro.herorpg.core.managers.ILevelManager;
 
 public class ExperienceListener implements Listener {
     
@@ -45,7 +45,7 @@ public class ExperienceListener implements Listener {
 
         UUID p_uuid = player.getUniqueId();
 
-        LevelManager manager = this.plugin.getLevelManager();
+        ILevelManager manager = this.plugin.getLevelManager();
 
         int dropXP = manager.getMobDropXP(mob.getType());
 

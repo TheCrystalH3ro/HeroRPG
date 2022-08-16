@@ -8,16 +8,16 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.h3ro.herorpg.App;
-import me.h3ro.herorpg.managers.LevelManager;
+import me.h3ro.herorpg.core.managers.ILevelManager;
 import me.h3ro.herorpg.utils.Utils;
 
 public class HeroCommands implements CommandExecutor {
 
     private App plugin;
 
-    private LevelManager levelManager;
+    private ILevelManager levelManager;
     
-    public HeroCommands(App plugin, LevelManager levelManager){
+    public HeroCommands(App plugin, ILevelManager levelManager){
         this.plugin = plugin;
 
         this.levelManager = levelManager;
@@ -76,11 +76,10 @@ public class HeroCommands implements CommandExecutor {
                         }
 
                         Player player = (Player) sender;
-                        LevelManager manager = new LevelManager(plugin);
 
-                        int nextLvlXP = manager.getLevelRequirement(player);
+                        int nextLvlXP = this.levelManager.getLevelRequirement(player);
 
-                        sender.sendMessage(Utils.chat("&8[&6HeroRPG&8] &7Your experience: &6" + manager.getPlayerExperience(player) + "&7/&6" + nextLvlXP ));
+                        sender.sendMessage(Utils.chat("&8[&6HeroRPG&8] &7Your experience: &6" + this.levelManager.getPlayerExperience(player) + "&7/&6" + nextLvlXP ));
 
                         return true;
 
@@ -102,9 +101,8 @@ public class HeroCommands implements CommandExecutor {
                         }
 
                         Player player = (Player) sender;
-                        LevelManager manager = new LevelManager(plugin);
 
-                        int playerLvl = manager.getPlayerLevel(player);
+                        int playerLvl = this.levelManager.getPlayerLevel(player);
 
                         sender.sendMessage(Utils.chat("&8[&6HeroRPG&8] &7Your level: &6" + playerLvl));
 
@@ -240,12 +238,11 @@ public class HeroCommands implements CommandExecutor {
 
                         @SuppressWarnings("deprecation")
                         OfflinePlayer player = Bukkit.getOfflinePlayer(args[1]);
-                        LevelManager manager = new LevelManager(plugin);
 
 
                         if(player.hasPlayedBefore()){
                             
-                            int playerLvl = manager.getPlayerLevel(player);
+                            int playerLvl = this.levelManager.getPlayerLevel(player);
 
                             sender.sendMessage(Utils.chat("&8[&6HeroRPG&8] &3"+ player.getName() +" &7's level: &6" + playerLvl));
 
@@ -311,12 +308,10 @@ public class HeroCommands implements CommandExecutor {
                     if(args[1].equalsIgnoreCase("get")){
 
                         if(sender.hasPermission("herorpg.view")){
-
-                            LevelManager manager = new LevelManager(plugin);
     
                             if(player.hasPlayedBefore()){
                                 
-                                int playerLvl = manager.getPlayerLevel(player);
+                                int playerLvl = this.levelManager.getPlayerLevel(player);
     
                                 sender.sendMessage(Utils.chat("&8[&6HeroRPG&8] &3"+ player.getName() +" &7's level: &6" + playerLvl));
 
@@ -351,7 +346,6 @@ public class HeroCommands implements CommandExecutor {
 
                     @SuppressWarnings("deprecation")
                     OfflinePlayer player = Bukkit.getOfflinePlayer(args[2]);
-                    LevelManager manager = new LevelManager(plugin);
                     int amount = Integer.parseInt(args[3]);
 
                     //herorpg experience add <player> <amount>
@@ -363,7 +357,7 @@ public class HeroCommands implements CommandExecutor {
                         }
 
                         if(player.hasPlayedBefore()){
-                            manager.addExperienceToPlayer(player, amount);
+                            this.levelManager.addExperienceToPlayer(player, amount);
                             sender.sendMessage( Utils.chat( "&8[&6HeroRPG&8] &7You have successfully added &6" + args[3] + " XP &7to the player &3" + player.getName() ) );
 
                             return true;
@@ -384,7 +378,7 @@ public class HeroCommands implements CommandExecutor {
                         }
 
                         if(player.hasPlayedBefore()){
-                            manager.removeExperienceFromPlayer(player, amount);
+                            this.levelManager.removeExperienceFromPlayer(player, amount);
                             sender.sendMessage( Utils.chat( "&8[&6HeroRPG&8] &7You have successfully removed &6" + args[3] + " XP &7from the player &3" + player.getName() ) );
 
                             return true;
@@ -405,7 +399,7 @@ public class HeroCommands implements CommandExecutor {
                         }
 
                         if(player.hasPlayedBefore()){
-                            manager.setPlayerExperience(player, amount);
+                            this.levelManager.setPlayerExperience(player, amount);
                             sender.sendMessage( Utils.chat( "&8[&6HeroRPG&8] &7You have successfully set the XP of player &3" + player.getName() + " &7to &6" + args[3] + " XP&7." ) );
 
                             return true;
@@ -423,7 +417,6 @@ public class HeroCommands implements CommandExecutor {
 
                     @SuppressWarnings("deprecation")
                     OfflinePlayer player = Bukkit.getOfflinePlayer(args[2]);
-                    LevelManager manager = new LevelManager(plugin);
                     int amount = Integer.parseInt(args[3]);
 
                     //herorpg level add <player> <amount>
@@ -435,7 +428,7 @@ public class HeroCommands implements CommandExecutor {
                         }
 
                         if(player.hasPlayedBefore()){
-                            manager.addLevelToPlayer(player, amount);
+                            this.levelManager.addLevelToPlayer(player, amount);
                             sender.sendMessage( Utils.chat( "&8[&6HeroRPG&8] &7You have successfully added &6" + args[3] + " LVL &7to the player &3" + player.getName() ) );
 
                             return true;
@@ -456,7 +449,7 @@ public class HeroCommands implements CommandExecutor {
                         }
 
                         if(player.hasPlayedBefore()){
-                            manager.removeLevelFromPlayer(player, amount);
+                            this.levelManager.removeLevelFromPlayer(player, amount);
                             sender.sendMessage( Utils.chat( "&8[&6HeroRPG&8] &7You have successfully removed &6" + args[3] + " LVL &7from the player &3" + player.getName() ) );
 
                             return true;
@@ -477,7 +470,7 @@ public class HeroCommands implements CommandExecutor {
                         }
 
                         if(player.hasPlayedBefore()){
-                            manager.setPlayerLevel(player, amount);
+                            this.levelManager.setPlayerLevel(player, amount);
                             sender.sendMessage( Utils.chat( "&8[&6HeroRPG&8] &7You have successfully set the LVL of player &3" + player.getName() + " &7to &6" + args[3] + "&7." ) );
 
                             return true;

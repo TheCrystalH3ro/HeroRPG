@@ -1,4 +1,4 @@
-package me.h3ro.herorpg.modules.party;
+package me.h3ro.herorpg.core.modules.party;
 
 import java.util.ArrayList;
 

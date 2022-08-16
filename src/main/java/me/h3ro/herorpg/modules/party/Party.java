@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import org.bukkit.OfflinePlayer;
 
+import me.h3ro.herorpg.core.modules.party.IParty;
+
 public class Party implements IParty {
 
     private OfflinePlayer owner;

@@ -21,10 +21,12 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import me.h3ro.herorpg.App;
+import me.h3ro.herorpg.core.managers.ILevelManager;
+import me.h3ro.herorpg.core.modules.levels.ILevelRequirement;
 import me.h3ro.herorpg.modules.levels.LevelRequirement;
 import me.h3ro.herorpg.utils.Utils;
 
-public class LevelManager {
+public class LevelManager implements ILevelManager {
 
     private App plugin;
     
@@ -33,7 +35,7 @@ public class LevelManager {
 
     private int maxLvl;
 
-    private PriorityQueue<LevelRequirement> lvlUpReq;
+    private PriorityQueue<ILevelRequirement> lvlUpReq;
 
     private ArrayList<Integer> toLvlUp;
 
@@ -148,7 +150,7 @@ public class LevelManager {
 
     }
 
-    private void setupLevelExperience(){
+    private void setupLevelExperience() {
         
         this.maxLvl = plugin.getMaxLvl();
 
@@ -173,8 +175,8 @@ public class LevelManager {
             return;
         }
 
-        LevelRequirement previous = null;
-        LevelRequirement levelMark = lvlUpReq.poll();
+        ILevelRequirement previous = null;
+        ILevelRequirement levelMark = lvlUpReq.poll();
 
         if(lvlUpReq.peek() == null) {
             this.toLvlUp =  new ArrayList<Integer>(Collections.nCopies(this.maxLvl, levelMark.getXP()));
@@ -251,7 +253,7 @@ public class LevelManager {
         }
     }
 
-    public void addExperienceToPlayer(OfflinePlayer player, int amount){
+    public void addExperienceToPlayer(OfflinePlayer player, int amount) {
 
         UUID p_uuid = player.getUniqueId();
 
@@ -270,7 +272,7 @@ public class LevelManager {
 
     }
 
-    public void removeExperienceFromPlayer(OfflinePlayer player, int amount){
+    public void removeExperienceFromPlayer(OfflinePlayer player, int amount) {
         UUID p_uuid = player.getUniqueId();
                 
         if(experience.get(p_uuid) != null){
@@ -301,7 +303,7 @@ public class LevelManager {
         this.experienceChanged(player);
     }
 
-    public int getPlayerExperience(OfflinePlayer player){
+    public int getPlayerExperience(OfflinePlayer player) {
         UUID p_uuid = player.getUniqueId();
         
         if(experience.get(p_uuid) != null){
@@ -311,7 +313,7 @@ public class LevelManager {
         }
     }
 
-    public void addLevelToPlayer(OfflinePlayer player, int amount){
+    public void addLevelToPlayer(OfflinePlayer player, int amount) {
 
         UUID p_uuid = player.getUniqueId();
 
@@ -343,39 +345,7 @@ public class LevelManager {
 
     }
 
-    public void levelUp(OfflinePlayer player){
-
-        UUID p_uuid = player.getUniqueId();
-
-        int lvlToAdd;
-
-        if( level.get(p_uuid) != null) {
-
-            lvlToAdd = level.get(p_uuid) + 1;
-
-            if(lvlToAdd > maxLvl){
-                lvlToAdd = maxLvl;
-            }
-
-            level.put(p_uuid, lvlToAdd );
-
-        } else {
-
-            lvlToAdd = 2;
-
-            if(lvlToAdd > maxLvl) {
-                lvlToAdd = maxLvl;
-            }
-
-            level.put(p_uuid, lvlToAdd);
-
-        }
-
-        this.levelChanged(player);
-
-    }
-
-    public void removeLevelFromPlayer(OfflinePlayer player, int amount){
+    public void removeLevelFromPlayer(OfflinePlayer player, int amount) {
         UUID p_uuid = player.getUniqueId();
                 
         if(level.get(p_uuid) != null){
@@ -412,7 +382,7 @@ public class LevelManager {
 
     }
 
-    public int getPlayerLevel(OfflinePlayer player){
+    public int getPlayerLevel(OfflinePlayer player) {
         UUID p_uuid = player.getUniqueId();
         
         if(level.get(p_uuid) != null){
@@ -422,7 +392,37 @@ public class LevelManager {
         }
     }
 
-    public void experienceReceived(OfflinePlayer player){
+    public void updateExperienceDisplay(OfflinePlayer player) {
+
+        Player p = player.getPlayer();
+
+        int xp = this.getPlayerExperience(player);
+
+        if(p != null && !this.plugin.isXPBarEnabled()) {
+            
+            int maxXP = this.getLevelRequirement(player);
+
+            float percentage = xp / (float) maxXP;
+
+            p.setExp(percentage);
+
+        }
+
+    }
+
+    public void updateLevelDisplay(OfflinePlayer player) {
+
+        Player p = player.getPlayer();
+
+        int lvl = this.getPlayerLevel(player);
+
+        if(p != null && !this.plugin.isXPBarEnabled()) {
+            p.setLevel(lvl);
+        }
+
+    }
+
+    private void experienceReceived(OfflinePlayer player){
 
         UUID p_uuid = player.getUniqueId();
 
@@ -464,36 +464,6 @@ public class LevelManager {
 
     }
 
-    public void updateExperienceDisplay(OfflinePlayer player) {
-
-        Player p = player.getPlayer();
-
-        int xp = this.getPlayerExperience(player);
-
-        if(p != null && !this.plugin.isXPBarEnabled()) {
-            
-            int maxXP = this.getLevelRequirement(player);
-
-            float percentage = xp / (float) maxXP;
-
-            p.setExp(percentage);
-
-        }
-
-    }
-
-    public void updateLevelDisplay(OfflinePlayer player) {
-
-        Player p = player.getPlayer();
-
-        int lvl = this.getPlayerLevel(player);
-
-        if(p != null && !this.plugin.isXPBarEnabled()) {
-            p.setLevel(lvl);
-        }
-
-    }
-
     private void experienceChanged(OfflinePlayer player) {
 
         this.updateExperienceDisplay(player);
@@ -506,7 +476,7 @@ public class LevelManager {
 
     }
 
-    public void onLevelUp(OfflinePlayer p, int level){
+    private void onLevelUp(OfflinePlayer p, int level) {
 
         if(p.isOnline()){
             Player player = (Player) p;

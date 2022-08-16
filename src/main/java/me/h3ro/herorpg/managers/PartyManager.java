@@ -14,10 +14,11 @@ import java.util.zip.GZIPOutputStream;
 import org.bukkit.OfflinePlayer;
 
 import me.h3ro.herorpg.App;
-import me.h3ro.herorpg.modules.party.IParty;
+import me.h3ro.herorpg.core.managers.IPartyManager;
+import me.h3ro.herorpg.core.modules.party.IParty;
 import me.h3ro.herorpg.modules.party.Party;
 
-public class PartyManager {
+public class PartyManager implements IPartyManager {
     
     private App plugin;
 

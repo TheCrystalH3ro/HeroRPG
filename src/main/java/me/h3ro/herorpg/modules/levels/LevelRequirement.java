@@ -2,7 +2,9 @@ package me.h3ro.herorpg.modules.levels;
 
 import java.util.List;
 
-public class LevelRequirement  implements Comparable<LevelRequirement> {
+import me.h3ro.herorpg.core.modules.levels.ILevelRequirement;
+
+public class LevelRequirement implements ILevelRequirement {
     
     private int level;
     private int xp;
@@ -35,9 +37,9 @@ public class LevelRequirement  implements Comparable<LevelRequirement> {
     }
 
     @Override
-    public int compareTo(LevelRequirement requirement) {
+    public int compareTo(ILevelRequirement requirement) {
         
-        return this.level - requirement.level;
+        return this.level - requirement.getLevel();
 
     }
 

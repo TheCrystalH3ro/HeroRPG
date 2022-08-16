@@ -12,6 +12,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import me.h3ro.herorpg.commands.HeroCommands;
 import me.h3ro.herorpg.configuration.AppConfig;
+import me.h3ro.herorpg.core.managers.ILevelManager;
+import me.h3ro.herorpg.core.managers.IPartyManager;
 import me.h3ro.herorpg.listeners.ExperienceListener;
 import me.h3ro.herorpg.listeners.PlayerJoinListener;
 import me.h3ro.herorpg.managers.LevelManager;
@@ -21,8 +23,8 @@ public class App extends JavaPlugin {
     
     private FileConfiguration config;
     
-    private LevelManager levelManager;
-    private PartyManager partyManager;
+    private ILevelManager levelManager;
+    private IPartyManager partyManager;
 
     public void updateConfig() {
         this.reloadConfig();
@@ -138,7 +140,7 @@ public class App extends JavaPlugin {
         
     }
 
-    public LevelManager getLevelManager() {
+    public ILevelManager getLevelManager() {
         return this.levelManager;
     }
 
