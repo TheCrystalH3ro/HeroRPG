@@ -15,12 +15,14 @@ import me.h3ro.herorpg.configuration.AppConfig;
 import me.h3ro.herorpg.listeners.ExperienceListener;
 import me.h3ro.herorpg.listeners.PlayerJoinListener;
 import me.h3ro.herorpg.managers.LevelManager;
+import me.h3ro.herorpg.managers.PartyManager;
 
 public class App extends JavaPlugin {
     
     private FileConfiguration config;
     
     private LevelManager levelManager;
+    private PartyManager partyManager;
 
     public void updateConfig() {
         this.reloadConfig();
@@ -53,6 +55,7 @@ public class App extends JavaPlugin {
         try{
             this.levelManager.saveExperienceFile();
             this.levelManager.saveLevelFile();
+            this.partyManager.savePartyFile();
         } catch(IOException e){
             e.printStackTrace();
         }
@@ -66,6 +69,14 @@ public class App extends JavaPlugin {
         try{
             this.levelManager.loadExperienceFile();
             this.levelManager.loadLevelFile();
+        } catch(ClassNotFoundException | IOException e){
+            e.printStackTrace();
+        }
+
+        this.partyManager = new PartyManager(this);
+
+        try{
+            this.partyManager.loadPartyFile();
         } catch(ClassNotFoundException | IOException e){
             e.printStackTrace();
         }
