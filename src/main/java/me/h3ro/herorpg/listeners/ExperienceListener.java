@@ -49,7 +49,7 @@ public class ExperienceListener implements Listener {
 
         int dropXP = manager.getMobDropXP(mob.getType());
 
-        manager.addExperienceToPlayer(Bukkit.getOfflinePlayer(p_uuid), dropXP);
+        manager.addExperienceToPlayer(this.plugin.getPlayer(p_uuid), dropXP);
 
     }
     

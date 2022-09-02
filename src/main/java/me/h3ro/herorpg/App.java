@@ -1,42 +1,43 @@
 package me.h3ro.herorpg;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.h3ro.herorpg.commands.HeroCommands;
 import me.h3ro.herorpg.configuration.AppConfig;
 import me.h3ro.herorpg.core.managers.ILevelManager;
 import me.h3ro.herorpg.core.managers.IPartyManager;
+import me.h3ro.herorpg.core.managers.IPlayerManager;
+import me.h3ro.herorpg.core.modules.player.IPlayer;
 import me.h3ro.herorpg.listeners.ExperienceListener;
 import me.h3ro.herorpg.listeners.PlayerJoinListener;
 import me.h3ro.herorpg.managers.LevelManager;
 import me.h3ro.herorpg.managers.PartyManager;
+import me.h3ro.herorpg.managers.PlayerManager;
+import me.h3ro.herorpg.modules.player.Player;
 
 public class App extends JavaPlugin {
     
     private FileConfiguration config;
     
+    private IPlayerManager playerManager;
     private ILevelManager levelManager;
     private IPartyManager partyManager;
 
     public void updateConfig() {
+
         this.reloadConfig();
         this.config = this.getConfig();
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
+        this.updatePlayers();
 
-            OfflinePlayer p = Bukkit.getOfflinePlayer(player.getUniqueId());
-
-            this.updatePlayerUI(p);
-
-        }
     }
 
     @Override
@@ -48,6 +49,8 @@ public class App extends JavaPlugin {
         this.registerManagers();
         this.registerCommands();
         this.registerListeners();
+
+        this.updatePlayers();
         
     }
 
@@ -57,6 +60,11 @@ public class App extends JavaPlugin {
         try{
             this.levelManager.saveExperienceFile();
             this.levelManager.saveLevelFile();
+        } catch(IOException e){
+            e.printStackTrace();
+        }
+
+        try{
             this.partyManager.savePartyFile();
         } catch(IOException e){
             e.printStackTrace();
@@ -65,6 +73,8 @@ public class App extends JavaPlugin {
     }
 
     private void registerManagers() {
+
+        this.playerManager= new PlayerManager(this);
 
         this.levelManager = new LevelManager(this);
 
@@ -123,25 +133,61 @@ public class App extends JavaPlugin {
 
     public void initPlayerJoin(OfflinePlayer player) {
 
-        int playerLvl = this.levelManager.getPlayerLevel(player);
+        IPlayer myPlayer = new Player(player);
 
-        if(playerLvl <= 0){
-            this.levelManager.setPlayerLevel(player, 1);
+        if(!this.playerManager.hasPlayedBefore(myPlayer)) {
+            this.playerManager.addPlayer(myPlayer);
         }
 
-        this.updatePlayerUI(player);
+        this.updatePlayer(myPlayer);
 
     }
 
-    private void updatePlayerUI(OfflinePlayer player) {
+    private void updatePlayers() {
+
+        for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
+
+            IPlayer myPlayer = new Player(player);
+
+            if(!this.playerManager.hasPlayedBefore(myPlayer)) {
+                this.playerManager.addPlayer(myPlayer);
+            }
+    
+            this.updatePlayer(myPlayer);
+
+        }
+
+    }
+
+    private void updatePlayerUI(IPlayer player) {
 
         this.levelManager.updateExperienceDisplay(player);
         this.levelManager.updateLevelDisplay(player);
         
     }
 
+    private void updatePlayer(IPlayer player) {
+
+        int playerLvl = this.levelManager.getPlayerLevel(player);
+        int playerXP = this.levelManager.getPlayerExperience(player);
+        
+        player.setLevel(playerLvl);
+        player.setExperience(playerXP);
+
+        this.updatePlayerUI(player);
+
+    }
+
     public ILevelManager getLevelManager() {
         return this.levelManager;
+    }
+
+    public IPlayer getPlayer(UUID playerId) {
+        return this.playerManager.getPlayer(playerId);
+    }
+
+    public IPlayer getPlayer(String playerName) {
+        return this.playerManager.getPlayer(playerName);
     }
 
 }

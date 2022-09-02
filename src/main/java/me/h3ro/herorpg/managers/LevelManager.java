@@ -15,7 +15,6 @@ import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -23,6 +22,7 @@ import org.bukkit.entity.Player;
 import me.h3ro.herorpg.App;
 import me.h3ro.herorpg.core.managers.ILevelManager;
 import me.h3ro.herorpg.core.modules.levels.ILevelRequirement;
+import me.h3ro.herorpg.core.modules.player.IPlayer;
 import me.h3ro.herorpg.modules.levels.LevelRequirement;
 import me.h3ro.herorpg.utils.Utils;
 
@@ -256,9 +256,9 @@ public class LevelManager implements ILevelManager {
         }
     }
 
-    public void addExperienceToPlayer(OfflinePlayer player, int amount) {
+    public void addExperienceToPlayer(IPlayer player, int amount) {
 
-        UUID p_uuid = player.getUniqueId();
+        UUID p_uuid = player.getUuid();
 
         if( experience.get(p_uuid) != null){
 
@@ -270,17 +270,23 @@ public class LevelManager implements ILevelManager {
 
         }
 
+        int currentXP = player.getExperience();
+        player.setExperience(currentXP + amount);
+
         this.experienceReceived(player);
         this.experienceChanged(player);
 
     }
 
-    public void removeExperienceFromPlayer(OfflinePlayer player, int amount) {
-        UUID p_uuid = player.getUniqueId();
+    public void removeExperienceFromPlayer(IPlayer player, int amount) {
+
+        UUID p_uuid = player.getUuid();
+
+        int expToSet;
                 
-        if(experience.get(p_uuid) != null){
+        if(experience.get(p_uuid) != null) {
             
-            int expToSet = experience.get(p_uuid) - amount;
+            expToSet = experience.get(p_uuid) - amount;
     
             if(expToSet < 0){
                 expToSet = 0;
@@ -288,13 +294,23 @@ public class LevelManager implements ILevelManager {
             
             experience.put(p_uuid, expToSet);
 
-            this.experienceChanged(player);
-
         }
+
+        expToSet = player.getExperience() - amount;
+
+        if(expToSet < 0){
+            expToSet = 0;
+        }
+
+        player.setExperience(expToSet);
+
+        this.experienceChanged(player);
+
     }
 
-    public void setPlayerExperience(OfflinePlayer player, int amount) {
-        UUID p_uuid = player.getUniqueId();
+    public void setPlayerExperience(IPlayer player, int amount) {
+
+        UUID p_uuid = player.getUuid();
 
         if(amount < 0){
             amount = 0;
@@ -302,23 +318,27 @@ public class LevelManager implements ILevelManager {
         
         experience.put(p_uuid, amount);
 
+        player.setExperience(amount);
+
         this.experienceReceived(player);
         this.experienceChanged(player);
     }
 
-    public int getPlayerExperience(OfflinePlayer player) {
-        UUID p_uuid = player.getUniqueId();
+    public int getPlayerExperience(IPlayer player) {
+
+        UUID p_uuid = player.getUuid();
         
         if(experience.get(p_uuid) != null){
             return experience.get(p_uuid);
         } else {
             return 0;
         }
+
     }
 
-    public void addLevelToPlayer(OfflinePlayer player, int amount) {
+    public void addLevelToPlayer(IPlayer player, int amount) {
 
-        UUID p_uuid = player.getUniqueId();
+        UUID p_uuid = player.getUuid();
 
         int lvlToAdd;
 
@@ -344,16 +364,29 @@ public class LevelManager implements ILevelManager {
 
         }
 
+        int currentLevel = player.getLevel();
+
+        lvlToAdd = currentLevel + amount;
+
+        if(lvlToAdd > maxLvl){
+            lvlToAdd = maxLvl;
+        }
+
+        player.setLevel(lvlToAdd);
+
         this.levelChanged(player);
 
     }
 
-    public void removeLevelFromPlayer(OfflinePlayer player, int amount) {
-        UUID p_uuid = player.getUniqueId();
+    public void removeLevelFromPlayer(IPlayer player, int amount) {
+
+        UUID p_uuid = player.getUuid();
+
+        int lvlToSet;
                 
         if(level.get(p_uuid) != null){
             
-            int lvlToSet = level.get(p_uuid) - amount;
+            lvlToSet = level.get(p_uuid) - amount;
     
             if(lvlToSet <= 0){
                 lvlToSet = 1;
@@ -361,13 +394,23 @@ public class LevelManager implements ILevelManager {
             
             level.put(p_uuid, lvlToSet);
 
-            this.levelChanged(player);
-
         }
+
+        lvlToSet = player.getLevel() - amount;
+
+        if(lvlToSet <= 0){
+            lvlToSet = 1;
+        }
+
+        player.setLevel(lvlToSet);
+
+        this.levelChanged(player);
+
     }
 
-    public void setPlayerLevel(OfflinePlayer player, int amount) {
-        UUID p_uuid = player.getUniqueId();
+    public void setPlayerLevel(IPlayer player, int amount) {
+
+        UUID p_uuid = player.getUuid();
 
         experience.put(p_uuid, 0);
 
@@ -381,23 +424,27 @@ public class LevelManager implements ILevelManager {
         
         level.put(p_uuid, amount);
 
+        player.setLevel(amount);
+
         this.levelChanged(player);
 
     }
 
-    public int getPlayerLevel(OfflinePlayer player) {
-        UUID p_uuid = player.getUniqueId();
+    public int getPlayerLevel(IPlayer player) {
+
+        UUID p_uuid = player.getUuid();
         
         if(level.get(p_uuid) != null){
             return level.get(p_uuid);
         } else {
-            return 0;
+            return 1;
         }
+
     }
 
-    public void updateExperienceDisplay(OfflinePlayer player) {
+    public void updateExperienceDisplay(IPlayer player) {
 
-        Player p = player.getPlayer();
+        Player p = player.getOnlinePlayer();
 
         int xp = this.getPlayerExperience(player);
 
@@ -413,9 +460,9 @@ public class LevelManager implements ILevelManager {
 
     }
 
-    public void updateLevelDisplay(OfflinePlayer player) {
+    public void updateLevelDisplay(IPlayer player) {
 
-        Player p = player.getPlayer();
+        Player p = player.getOnlinePlayer();
 
         int lvl = this.getPlayerLevel(player);
 
@@ -425,9 +472,9 @@ public class LevelManager implements ILevelManager {
 
     }
 
-    private void experienceReceived(OfflinePlayer player){
+    private void experienceReceived(IPlayer player){
 
-        UUID p_uuid = player.getUniqueId();
+        UUID p_uuid = player.getUuid();
 
         int playerXP = experience.get(p_uuid);
 
@@ -461,28 +508,31 @@ public class LevelManager implements ILevelManager {
         experience.put(p_uuid, playerXP);
         level.put(p_uuid, playerLvl);
 
+        player.setExperience(playerXP);
+        player.setLevel(playerLvl);
+
         if(leveledUp) {
             this.onLevelUp(player, playerLvl);
         }
 
     }
 
-    private void experienceChanged(OfflinePlayer player) {
+    private void experienceChanged(IPlayer player) {
 
         this.updateExperienceDisplay(player);
 
     }
 
-    private void levelChanged(OfflinePlayer player) {
+    private void levelChanged(IPlayer player) {
 
         this.updateLevelDisplay(player);
 
     }
 
-    private void onLevelUp(OfflinePlayer p, int level) {
+    private void onLevelUp(IPlayer p, int level) {
 
         if(p.isOnline()){
-            Player player = (Player) p;
+            Player player = p.getOnlinePlayer();
             player.sendMessage(Utils.chat("&8[&6HeroRPG&8] &aYou have leveled up to level &6" + level + "&7!"));
         }
 
@@ -490,7 +540,7 @@ public class LevelManager implements ILevelManager {
 
     }
 
-    public int getLevelRequirement(OfflinePlayer player) {
+    public int getLevelRequirement(IPlayer player) {
 
         int level = this.getPlayerLevel(player) + 1;
 

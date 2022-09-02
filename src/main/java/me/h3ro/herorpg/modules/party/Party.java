@@ -2,37 +2,36 @@ package me.h3ro.herorpg.modules.party;
 
 import java.util.ArrayList;
 
-import org.bukkit.OfflinePlayer;
-
 import me.h3ro.herorpg.core.modules.party.IParty;
+import me.h3ro.herorpg.core.modules.player.IPlayer;
 
 public class Party implements IParty {
 
-    private OfflinePlayer owner;
-    private ArrayList<OfflinePlayer> members;
+    private IPlayer owner;
+    private ArrayList<IPlayer> members;
     
-    public Party(OfflinePlayer owner) {
+    public Party(IPlayer owner) {
 
         this.owner = owner;
 
         this.members = new ArrayList<>();
 
-        this.members.add(this.owner);
+        this.addPlayer(owner);
 
     }
 
     @Override
-    public OfflinePlayer getOwner() {
+    public IPlayer getOwner() {
         return this.owner;
     }
 
     @Override
-    public ArrayList<OfflinePlayer> getPlayers() {
+    public ArrayList<IPlayer> getPlayers() {
         return this.members;
     }
 
     @Override
-    public void addPlayer(OfflinePlayer player) {
+    public void addPlayer(IPlayer player) {
 
         if(this.members.contains(player)) {
             return;
@@ -40,32 +39,48 @@ public class Party implements IParty {
 
         this.members.add(player);
 
+        player.setParty(this);
+
     }
 
     @Override
-    public void removePlayer(OfflinePlayer player) {
+    public void removePlayer(IPlayer player) {
         
         if(!this.members.contains(player)) {
             return;
         }
 
+        if(this.isOwner(player)) {
+            return;
+        }
+
         this.members.remove(player);
+        player.setParty(null);
 
     }
 
     @Override
-    public boolean isOwner(OfflinePlayer player) {
+    public boolean isOwner(IPlayer player) {
         return this.owner.equals(player);
     }
 
     @Override
-    public boolean isMember(OfflinePlayer player) {
+    public boolean isMember(IPlayer player) {
         return this.members.contains(player);
     }
 
     @Override
     public boolean equals(IParty party) {
         return this.owner.equals(party.getOwner());
+    }
+
+    @Override
+    public void disband() {
+        
+        for(IPlayer player : this.members) {
+            player.setParty(null);
+        }
+
     }
 
 }

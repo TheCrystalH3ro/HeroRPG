@@ -3,8 +3,9 @@ package me.h3ro.herorpg.core.managers;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.EntityType;
+
+import me.h3ro.herorpg.core.modules.player.IPlayer;
 
 public interface ILevelManager {
 
@@ -13,20 +14,20 @@ public interface ILevelManager {
     public void loadExperienceFile() throws FileNotFoundException, IOException, ClassNotFoundException;
     public void loadLevelFile() throws FileNotFoundException, IOException, ClassNotFoundException;
 
-    public int getPlayerExperience(OfflinePlayer player);
-    public void setPlayerExperience(OfflinePlayer player, int amount);
-    public void addExperienceToPlayer(OfflinePlayer player, int amount);
-    public void removeExperienceFromPlayer(OfflinePlayer player, int amount);
+    public int getPlayerExperience(IPlayer player);
+    public void setPlayerExperience(IPlayer player, int amount);
+    public void addExperienceToPlayer(IPlayer player, int amount);
+    public void removeExperienceFromPlayer(IPlayer player, int amount);
 
-    public int getPlayerLevel(OfflinePlayer player);
-    public void setPlayerLevel(OfflinePlayer player, int amount);
-    public void addLevelToPlayer(OfflinePlayer player, int amount);
-    public void removeLevelFromPlayer(OfflinePlayer player, int amount);
+    public int getPlayerLevel(IPlayer player);
+    public void setPlayerLevel(IPlayer player, int amount);
+    public void addLevelToPlayer(IPlayer player, int amount);
+    public void removeLevelFromPlayer(IPlayer player, int amount);
 
-    public void updateExperienceDisplay(OfflinePlayer player);
-    public void updateLevelDisplay(OfflinePlayer player);
+    public void updateExperienceDisplay(IPlayer player);
+    public void updateLevelDisplay(IPlayer player);
 
-    public int getLevelRequirement(OfflinePlayer player);
+    public int getLevelRequirement(IPlayer player);
     public int getMobDropXP(EntityType type);
     
 }
