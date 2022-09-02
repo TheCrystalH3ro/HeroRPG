@@ -21,6 +21,7 @@ import me.h3ro.herorpg.core.modules.party.IParty;
 import me.h3ro.herorpg.core.modules.player.IPlayer;
 import me.h3ro.herorpg.modules.party.Party;
 import me.h3ro.herorpg.modules.player.Player;
+import me.h3ro.herorpg.utils.Utils;
 
 public class PartyManager implements IPartyManager {
     
@@ -66,6 +67,10 @@ public class PartyManager implements IPartyManager {
 
         playerList.add(player.getUuid());
 
+        String message = Utils.chat("&8[&6HeroRPG&8] &7Player &3" + player.getName() + "&7 has joined your party!");
+
+        party.notify(message);
+
     }
 
     public void removeFromParty(IParty party, IPlayer player) {
@@ -97,6 +102,10 @@ public class PartyManager implements IPartyManager {
         party.disband();
 
         this.partyData.remove(party.getOwner().getUuid());
+
+        String message = Utils.chat("&8[&6HeroRPG&8] &7Your party has been disbanded!");
+
+        party.notify(message, false);
 
     }
 

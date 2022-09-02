@@ -14,4 +14,7 @@ public interface IPartyManager {
     public IParty createParty(IPlayer player);
     public void removeParty(IParty party);
 
+    public void addToParty(IParty party, IPlayer player);
+    public void removeFromParty(IParty party, IPlayer player);
+
 }

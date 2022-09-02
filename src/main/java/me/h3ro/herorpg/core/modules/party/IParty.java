@@ -18,6 +18,9 @@ public interface IParty {
 
     public void disband();
 
+    public void notify(String message);
+    public void notify(String message, boolean includeOwner);
+
     public boolean equals(IParty party);
 
 }

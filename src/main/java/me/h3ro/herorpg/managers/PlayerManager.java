@@ -68,6 +68,10 @@ public class PlayerManager implements IPlayerManager {
         
         OfflinePlayer player = Bukkit.getPlayerExact(playerName);
 
+        if(player == null) {
+            return null;
+        }
+
         UUID playerId = player.getUniqueId();
 
         return this.getPlayer(playerId);

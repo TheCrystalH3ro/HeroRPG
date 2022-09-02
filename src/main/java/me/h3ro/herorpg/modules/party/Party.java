@@ -83,4 +83,28 @@ public class Party implements IParty {
 
     }
 
+    @Override
+    public void notify(String message) {
+        this.notify(message, true);
+    }
+
+    @Override
+    public void notify(String message, boolean includeOwner) {
+        
+        for(IPlayer player : this.members) {
+
+            if(!player.isOnline()) {
+                continue;
+            }
+
+            if(this.isOwner(player) && !includeOwner) {
+                continue;
+            }
+
+            player.getOnlinePlayer().sendMessage(message);
+
+        }
+        
+    }
+
 }

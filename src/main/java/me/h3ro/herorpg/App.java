@@ -96,7 +96,7 @@ public class App extends JavaPlugin {
     }
 
     private void registerCommands() {
-        new HeroCommands(this, this.levelManager);
+        new HeroCommands(this, this.levelManager, this.partyManager);
     }
 
     private void registerListeners() {
