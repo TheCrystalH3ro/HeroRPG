@@ -10,6 +10,7 @@ public interface IPlayerManager {
 
     public HashMap<UUID, IPlayer> getPlayers();
 
+    public boolean hasPlayedBefore(UUID uuid);
     public boolean hasPlayedBefore(IPlayer player);
 
     public void addPlayer(IPlayer player);

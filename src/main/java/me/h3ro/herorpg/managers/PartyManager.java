@@ -20,7 +20,6 @@ import me.h3ro.herorpg.core.managers.IPartyManager;
 import me.h3ro.herorpg.core.modules.party.IParty;
 import me.h3ro.herorpg.core.modules.player.IPlayer;
 import me.h3ro.herorpg.modules.party.Party;
-import me.h3ro.herorpg.modules.player.Player;
 import me.h3ro.herorpg.utils.Utils;
 
 public class PartyManager implements IPartyManager {
@@ -157,16 +156,24 @@ public class PartyManager implements IPartyManager {
         this.partyData = (HashMap<UUID, ArrayList<UUID>>) readObject;
 
         for (UUID ownerId : this.partyData.keySet()) {
+
+            if(!this.plugin.isPlayerLoaded(ownerId)) {
+                this.plugin.initPlayer(Bukkit.getOfflinePlayer(ownerId));
+            }
             
-            IPlayer owner = new Player(Bukkit.getPlayer(ownerId));
+            IPlayer owner = this.plugin.getPlayer(ownerId);
 
             IParty party = new Party(owner);
 
             this.parties.add(party);
 
             for (UUID playerId : this.partyData.get(ownerId)) {
+
+                if(!this.plugin.isPlayerLoaded(playerId)) {
+                    this.plugin.initPlayer(Bukkit.getOfflinePlayer(playerId));
+                }
                 
-                IPlayer player = new Player(Bukkit.getPlayer(playerId));
+                IPlayer player = this.plugin.getPlayer(playerId);
 
                 party.addPlayer(player);
 

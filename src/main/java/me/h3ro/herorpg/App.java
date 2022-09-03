@@ -133,13 +133,21 @@ public class App extends JavaPlugin {
 
     public void initPlayerJoin(OfflinePlayer player) {
 
+        IPlayer myPlayer = this.initPlayer(player);
+
+        this.updatePlayer(myPlayer);
+
+    }
+
+    public IPlayer initPlayer(OfflinePlayer player) {
+
         IPlayer myPlayer = new Player(player);
 
         if(!this.playerManager.hasPlayedBefore(myPlayer)) {
             this.playerManager.addPlayer(myPlayer);
         }
 
-        this.updatePlayer(myPlayer);
+        return myPlayer;
 
     }
 
@@ -188,6 +196,10 @@ public class App extends JavaPlugin {
 
     public IPlayer getPlayer(String playerName) {
         return this.playerManager.getPlayer(playerName);
+    }
+
+    public boolean isPlayerLoaded(UUID playerId) {
+        return this.playerManager.hasPlayedBefore(playerId);
     }
 
 }

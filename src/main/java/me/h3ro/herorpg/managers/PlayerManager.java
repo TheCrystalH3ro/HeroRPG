@@ -33,7 +33,12 @@ public class PlayerManager implements IPlayerManager {
 
     @Override
     public boolean hasPlayedBefore(IPlayer player) {
-        return this.players.containsKey(player.getUuid());
+        return this.hasPlayedBefore(player.getUuid());
+    }
+
+    @Override
+    public boolean hasPlayedBefore(UUID uuid) {
+        return this.players.containsKey(uuid);
     }
 
     @Override
